@@ -1,0 +1,1104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#1e3c72">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="manifest" href="manifest.json">
+    <title>Mat Modern Warfare Chess - Online Multiplayer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 10px;
+            overflow-x: hidden;
+        }
+        
+        .game-container {
+            max-width: 500px;
+            width: 100%;
+            display: none;
+        }
+        
+        .game-container.active {
+            display: block;
+        }
+        
+        .menu-container {
+            max-width: 400px;
+            width: 100%;
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+            margin-top: 50px;
+        }
+        
+        .menu-container.hidden {
+            display: none;
+        }
+        
+        h1 {
+            color: #1e3c72;
+            font-size: 28px;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+        
+        .menu-btn {
+            width: 100%;
+            padding: 15px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .menu-btn.primary {
+            background: #4a90e2;
+            color: white;
+        }
+        
+        .menu-btn.primary:hover {
+            background: #357abd;
+            transform: translateY(-2px);
+        }
+        
+        .menu-btn.secondary {
+            background: #f0f0f0;
+            color: #333;
+        }
+        
+        .menu-btn.secondary:hover {
+            background: #e0e0e0;
+        }
+        
+        .input-group {
+            margin: 20px 0;
+        }
+        
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+        }
+        
+        .input-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            text-align: center;
+            text-transform: uppercase;
+        }
+        
+        .input-group input:focus {
+            outline: none;
+            border-color: #4a90e2;
+        }
+        
+        .room-code-display {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        .room-code-display .label {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+        
+        .room-code-display .code {
+            font-size: 32px;
+            font-weight: bold;
+            color: #1e3c72;
+            letter-spacing: 3px;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .copy-btn {
+            margin-top: 10px;
+            padding: 8px 16px;
+            background: #4a90e2;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .status-message {
+            text-align: center;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        
+        .status-message.info {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+        
+        .status-message.success {
+            background: #e8f5e9;
+            color: #388e3c;
+        }
+        
+        .status-message.error {
+            background: #ffebee;
+            color: #c62828;
+        }
+        
+        .status-message.waiting {
+            background: #fff3e0;
+            color: #f57c00;
+        }
+        
+        .header {
+            background: white;
+            border-radius: 15px 15px 0 0;
+            padding: 15px;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+        
+        .game-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .player-info {
+            font-size: 14px;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-weight: 600;
+        }
+        
+        .player-info.you {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+        
+        .player-info.opponent {
+            background: #ffebee;
+            color: #c62828;
+        }
+        
+        .turn-indicator {
+            font-size: 16px;
+            font-weight: bold;
+            padding: 8px 16px;
+            border-radius: 20px;
+            display: inline-block;
+            margin-top: 5px;
+        }
+        
+        .turn-white {
+            background: #4a90e2;
+            color: white;
+        }
+        
+        .turn-black {
+            background: #c0392b;
+            color: white;
+        }
+        
+        .board-container {
+            background: white;
+            padding: 15px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+        
+        .board {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 0;
+            border: 3px solid #333;
+            aspect-ratio: 6/10;
+            width: 100%;
+            max-width: 360px;
+            margin: 0 auto;
+        }
+        
+        .square {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            position: relative;
+            user-select: none;
+        }
+        
+        .square.light {
+            background: #f0d9b5;
+        }
+        
+        .square.dark {
+            background: #b58863;
+        }
+        
+        .square.selected {
+            background: #baca44 !important;
+            box-shadow: inset 0 0 0 3px #829817;
+        }
+        
+        .square.valid-move {
+            background: rgba(106, 176, 76, 0.3) !important;
+        }
+        
+        .square.valid-move::after {
+            content: '';
+            position: absolute;
+            width: 30%;
+            height: 30%;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 50%;
+        }
+        
+        .square.valid-capture {
+            background: rgba(255, 0, 0, 0.3) !important;
+        }
+        
+        .square.valid-capture::after {
+            content: '';
+            position: absolute;
+            width: 85%;
+            height: 85%;
+            border: 3px solid rgba(255, 0, 0, 0.6);
+            border-radius: 50%;
+        }
+        
+        .square.last-move {
+            background: rgba(255, 255, 0, 0.4) !important;
+        }
+        
+        .piece {
+            width: 85%;
+            height: 85%;
+            pointer-events: none;
+        }
+        
+        .controls {
+            background: white;
+            border-radius: 0 0 15px 15px;
+            padding: 15px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+        
+        .button {
+            background: #4a90e2;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+        
+        .button:hover {
+            background: #357abd;
+        }
+        
+        .button.danger {
+            background: #c0392b;
+        }
+        
+        .button.danger:hover {
+            background: #a02818;
+        }
+        
+        .captured-pieces {
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+            min-height: 40px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+        
+        .captured-piece {
+            width: 30px;
+            height: 30px;
+            opacity: 0.6;
+        }
+        
+        .label {
+            font-size: 12px;
+            font-weight: bold;
+            color: #666;
+            margin-bottom: 5px;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #4a90e2;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Menu Screen -->
+    <div class="menu-container" id="menuContainer">
+        <h1>⚔️ Mat Modern Warfare Chess</h1>
+        <p class="subtitle">Play online with friends</p>
+        
+        <div id="mainMenu">
+            <button class="menu-btn primary" onclick="showCreateGame()">Create Game</button>
+            <button class="menu-btn primary" onclick="showJoinGame()">Join Game</button>
+            <button class="menu-btn secondary" onclick="playLocal()">Play Local (Same Device)</button>
+        </div>
+        
+        <div id="createGameMenu" style="display: none;">
+            <div class="room-code-display">
+                <div class="label">Your Room Code:</div>
+                <div class="code" id="roomCodeDisplay">----</div>
+                <button class="copy-btn" onclick="copyRoomCode()">Copy Code</button>
+            </div>
+            <div class="status-message waiting">
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p style="margin-top: 10px;">Waiting for opponent to join...</p>
+                </div>
+            </div>
+            <button class="menu-btn secondary" onclick="cancelGame()">Cancel</button>
+        </div>
+        
+        <div id="joinGameMenu" style="display: none;">
+            <div class="input-group">
+                <label>Enter Room Code:</label>
+                <input type="text" id="roomCodeInput" maxlength="4" placeholder="ABCD">
+            </div>
+            <div id="joinStatus"></div>
+            <button class="menu-btn primary" onclick="joinGame()">Join Game</button>
+            <button class="menu-btn secondary" onclick="backToMenu()">Back</button>
+        </div>
+    </div>
+
+    <!-- Game Screen -->
+    <div class="game-container" id="gameContainer">
+        <div class="header">
+            <div class="game-info">
+                <div class="player-info you">You: <span id="yourColor">White</span></div>
+                <div class="player-info opponent">Opponent: <span id="oppColor">Black</span></div>
+            </div>
+            <div class="turn-indicator" id="turnIndicator">White's Turn</div>
+            <div class="status-message info" id="gameStatus" style="margin-top: 10px; display: none;"></div>
+        </div>
+        
+        <div class="board-container">
+            <div class="label">Opponent's Captured:</div>
+            <div class="captured-pieces" id="capturedOpponent"></div>
+            
+            <div class="board" id="board"></div>
+            
+            <div class="label" style="margin-top: 10px;">Your Captured:</div>
+            <div class="captured-pieces" id="capturedYou"></div>
+        </div>
+        
+        <div class="controls">
+            <button class="button danger" onclick="leaveGame()">Leave Game</button>
+        </div>
+    </div>
+
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <script>
+        // THIS VERSION USES PEERJS FOR PEER-TO-PEER CONNECTION (NO SERVER NEEDED!)
+        // Alternative: Use Socket.IO with a backend server
+        
+        // Game State
+        let board = [];
+        let currentTurn = 'white';
+        let selectedSquare = null;
+        let validMoves = [];
+        let capturedWhite = [];
+        let capturedBlack = [];
+        let lastMove = null;
+        let gameOver = false;
+        let myColor = null;
+        let roomCode = null;
+        let socket = io(); // Connect to Socket.IO server
+        let isHost = false;
+
+        // Socket.IO Event Handlers
+        socket.on('connect', () => {
+            console.log('Connected to server');
+        });
+
+        socket.on('opponent-joined', () => {
+            console.log('Opponent joined!');
+            startGame();
+        });
+
+        socket.on('opponent-move', (move) => {
+            console.log('Opponent move received:', move);
+            receiveMove(move);
+        });
+
+        socket.on('opponent-left', () => {
+            alert('Your opponent left the game');
+            leaveGame();
+        });
+        
+        function showCreateGame() {
+            document.getElementById('mainMenu').style.display = 'none';
+            document.getElementById('createGameMenu').style.display = 'block';
+            createRoom();
+        }
+        
+        function showJoinGame() {
+            document.getElementById('mainMenu').style.display = 'none';
+            document.getElementById('joinGameMenu').style.display = 'block';
+        }
+        
+        function backToMenu() {
+            document.getElementById('joinGameMenu').style.display = 'none';
+            document.getElementById('createGameMenu').style.display = 'none';
+            document.getElementById('mainMenu').style.display = 'block';
+        }
+        
+        function cancelGame() {
+            backToMenu();
+        }
+        
+        function playLocal() {
+            window.location.href = 'warfare-chess-playable.html';
+        }
+        
+        function createRoom() {
+            // Generate 4-letter room code
+            roomCode = generateRoomCode();
+            document.getElementById('roomCodeDisplay').textContent = roomCode;
+            isHost = true;
+            myColor = 'white';
+            
+            // Initialize PeerJS connection
+            initializePeerConnection(true);
+        }
+        
+        function joinGame() {
+            const code = document.getElementById('roomCodeInput').value.toUpperCase();
+            if (code.length !== 4) {
+                showJoinStatus('Please enter a 4-letter code', 'error');
+                return;
+            }
+            
+            roomCode = code;
+            isHost = false;
+            myColor = 'black';
+            showJoinStatus('Connecting...', 'info');
+            
+            // Initialize PeerJS connection
+            initializePeerConnection(false);
+        }
+        
+        function generateRoomCode() {
+            const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+            let code = '';
+            for (let i = 0; i < 4; i++) {
+                code += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return code;
+        }
+        
+        function copyRoomCode() {
+            navigator.clipboard.writeText(roomCode);
+            alert('Room code copied to clipboard!');
+        }
+        
+        function showJoinStatus(message, type) {
+            const statusEl = document.getElementById('joinStatus');
+            statusEl.innerHTML = `<div class="status-message ${type}">${message}</div>`;
+        }
+        
+        function initializePeerConnection(isHosting) {
+            if (isHosting) {
+                socket.emit('create-room', (code) => {
+                    console.log('Room created:', code);
+                    roomCode = code;
+                    document.getElementById('roomCodeDisplay').textContent = code;
+                });
+            } else {
+                socket.emit('join-room', roomCode, (response) => {
+                    console.log('Join response:', response);
+                    if (response.success) {
+                        showJoinStatus('Connected! Starting game...', 'success');
+                        setTimeout(() => startGame(), 500);
+                    } else {
+                        showJoinStatus(response.message, 'error');
+                    }
+                });
+            }
+        }
+        
+        function startGame() {
+            document.getElementById('menuContainer').classList.add('hidden');
+            document.getElementById('gameContainer').classList.add('active');
+            
+            document.getElementById('yourColor').textContent = myColor.charAt(0).toUpperCase() + myColor.slice(1);
+            document.getElementById('oppColor').textContent = myColor === 'white' ? 'Black' : 'White';
+            
+            initBoard();
+            renderBoard();
+        }
+        
+        function leaveGame() {
+            if (confirm('Are you sure you want to leave this game?')) {
+                document.getElementById('gameContainer').classList.remove('active');
+                document.getElementById('menuContainer').classList.remove('hidden');
+                backToMenu();
+            }
+        }
+        
+        function sendMove(move) {
+            if (socket && socket.connected) {
+                socket.emit('move', { roomCode, move });
+                console.log('Move sent:', move);
+            }
+        }
+        
+        function receiveMove(move) {
+            const { fromRow, fromCol, toRow, toCol } = move;
+            makeMove(fromRow, fromCol, toRow, toCol);
+            renderBoard();
+        }
+
+        // Game Logic (same as before)
+        function initBoard() {
+            board = [
+                ['t', 'a', 'f', 'r', 'a', 't'],
+                ['s', 's', 'd', 'd', 's', 's'],
+                [null, 's', 's', 's', 's', null],
+                [null, null, null, null, null, null],
+                [null, null, null, null, null, null],
+                [null, null, null, null, null, null],
+                [null, null, null, null, null, null],
+                [null, 'S', 'S', 'S', 'S', null],
+                ['S', 'S', 'D', 'D', 'S', 'S'],
+                ['T', 'A', 'F', 'R', 'A', 'T']
+            ];
+            currentTurn = 'white';
+            selectedSquare = null;
+            validMoves = [];
+            capturedWhite = [];
+            capturedBlack = [];
+            lastMove = null;
+            gameOver = false;
+        }
+
+        function getPieceColor(piece) {
+            if (!piece) return null;
+            return piece === piece.toUpperCase() ? 'white' : 'black';
+        }
+
+        function isValidPos(row, col) {
+            return row >= 0 && row < 10 && col >= 0 && col < 6;
+        }
+
+        function getValidMoves(row, col) {
+            const piece = board[row][col];
+            if (!piece) return [];
+            
+            const color = getPieceColor(piece);
+            const type = piece.toLowerCase();
+            let moves = [];
+
+            if (type === 'r') {
+                for (let dr = -1; dr <= 1; dr++) {
+                    for (let dc = -1; dc <= 1; dc++) {
+                        if (dr === 0 && dc === 0) continue;
+                        const newRow = row + dr;
+                        const newCol = col + dc;
+                        if (isValidPos(newRow, newCol)) {
+                            const target = board[newRow][newCol];
+                            if (!target || getPieceColor(target) !== color) {
+                                moves.push([newRow, newCol]);
+                            }
+                        }
+                    }
+                }
+            } else if (type === 'f') {
+                const directions = [[-1,0], [1,0], [0,-1], [0,1], [-1,-1], [-1,1], [1,-1], [1,1]];
+                for (let [dr, dc] of directions) {
+                    let newRow = row + dr;
+                    let newCol = col + dc;
+                    while (isValidPos(newRow, newCol)) {
+                        const target = board[newRow][newCol];
+                        if (!target) {
+                            moves.push([newRow, newCol]);
+                        } else {
+                            if (getPieceColor(target) !== color) {
+                                moves.push([newRow, newCol]);
+                            }
+                            break;
+                        }
+                        newRow += dr;
+                        newCol += dc;
+                    }
+                }
+            } else if (type === 't') {
+                const directions = [[-1,0], [1,0], [0,-1], [0,1]];
+                for (let [dr, dc] of directions) {
+                    for (let dist = 1; dist <= 5; dist++) {
+                        const newRow = row + dr * dist;
+                        const newCol = col + dc * dist;
+                        if (!isValidPos(newRow, newCol)) break;
+                        
+                        const target = board[newRow][newCol];
+                        if (!target) {
+                            moves.push([newRow, newCol]);
+                        } else {
+                            if (getPieceColor(target) !== color) {
+                                moves.push([newRow, newCol]);
+                            }
+                            break;
+                        }
+                    }
+                }
+            } else if (type === 'd') {
+                const knightMoves = [
+                    [-2, -1], [-2, 1], [2, -1], [2, 1],
+                    [-1, -2], [-1, 2], [1, -2], [1, 2]
+                ];
+                for (let [dr, dc] of knightMoves) {
+                    const newRow = row + dr;
+                    const newCol = col + dc;
+                    if (isValidPos(newRow, newCol)) {
+                        const target = board[newRow][newCol];
+                        if (!target || getPieceColor(target) !== color) {
+                            moves.push([newRow, newCol]);
+                        }
+                    }
+                }
+                const cardinalMoves = [[-2, 0], [2, 0], [0, -2], [0, 2]];
+                for (let [dr, dc] of cardinalMoves) {
+                    const newRow = row + dr;
+                    const newCol = col + dc;
+                    if (isValidPos(newRow, newCol)) {
+                        const target = board[newRow][newCol];
+                        if (!target || getPieceColor(target) !== color) {
+                            moves.push([newRow, newCol]);
+                        }
+                    }
+                }
+            } else if (type === 'a') {
+                const directions = [[-1,-1], [-1,1], [1,-1], [1,1]];
+                for (let [dr, dc] of directions) {
+                    let newRow = row + dr;
+                    let newCol = col + dc;
+                    while (isValidPos(newRow, newCol)) {
+                        const target = board[newRow][newCol];
+                        if (!target) {
+                            moves.push([newRow, newCol]);
+                        } else {
+                            if (getPieceColor(target) !== color) {
+                                moves.push([newRow, newCol]);
+                            }
+                            break;
+                        }
+                        newRow += dr;
+                        newCol += dc;
+                    }
+                }
+            } else if (type === 's') {
+                const direction = color === 'white' ? -1 : 1;
+                const startRow = color === 'white' ? [7, 8] : [1, 2];
+                
+                const newRow = row + direction;
+                if (isValidPos(newRow, col) && !board[newRow][col]) {
+                    moves.push([newRow, col]);
+                    
+                    if (startRow.includes(row)) {
+                        const doubleRow = row + direction * 2;
+                        if (isValidPos(doubleRow, col) && !board[doubleRow][col]) {
+                            moves.push([doubleRow, col]);
+                        }
+                    }
+                }
+                
+                for (let dc of [-1, 1]) {
+                    const captureRow = row + direction;
+                    const captureCol = col + dc;
+                    if (isValidPos(captureRow, captureCol)) {
+                        const target = board[captureRow][captureCol];
+                        if (target && getPieceColor(target) !== color) {
+                            moves.push([captureRow, captureCol]);
+                        }
+                    }
+                }
+            }
+
+            return moves;
+        }
+
+        function isInCheck(color) {
+            let presidentPos = null;
+            for (let r = 0; r < 10; r++) {
+                for (let c = 0; c < 6; c++) {
+                    const piece = board[r][c];
+                    if (piece && piece.toLowerCase() === 'r' && getPieceColor(piece) === color) {
+                        presidentPos = [r, c];
+                        break;
+                    }
+                }
+                if (presidentPos) break;
+            }
+            
+            if (!presidentPos) return false;
+
+            for (let r = 0; r < 10; r++) {
+                for (let c = 0; c < 6; c++) {
+                    const piece = board[r][c];
+                    if (piece && getPieceColor(piece) !== color) {
+                        const moves = getValidMoves(r, c);
+                        for (let [mr, mc] of moves) {
+                            if (mr === presidentPos[0] && mc === presidentPos[1]) {
+                                return true;
+                            }
+                        }
+                    }
+                }
+            }
+            return false;
+        }
+
+        function isLegalMove(fromRow, fromCol, toRow, toCol) {
+            const piece = board[fromRow][fromCol];
+            const captured = board[toRow][toCol];
+            board[toRow][toCol] = piece;
+            board[fromRow][fromCol] = null;
+            
+            const inCheck = isInCheck(getPieceColor(piece));
+            
+            board[fromRow][fromCol] = piece;
+            board[toRow][toCol] = captured;
+            
+            return !inCheck;
+        }
+
+        function getAllLegalMoves(row, col) {
+            const moves = getValidMoves(row, col);
+            return moves.filter(([r, c]) => isLegalMove(row, col, r, c));
+        }
+
+        function hasLegalMoves(color) {
+            for (let r = 0; r < 10; r++) {
+                for (let c = 0; c < 6; c++) {
+                    const piece = board[r][c];
+                    if (piece && getPieceColor(piece) === color) {
+                        const moves = getAllLegalMoves(r, c);
+                        if (moves.length > 0) return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        function makeMove(fromRow, fromCol, toRow, toCol) {
+            const piece = board[fromRow][fromCol];
+            const captured = board[toRow][toCol];
+            
+            if (captured) {
+                if (getPieceColor(captured) === 'white') {
+                    capturedWhite.push(captured);
+                } else {
+                    capturedBlack.push(captured);
+                }
+            }
+            
+            board[toRow][toCol] = piece;
+            board[fromRow][fromCol] = null;
+            
+            if (piece.toLowerCase() === 's') {
+                if ((getPieceColor(piece) === 'white' && toRow === 0) ||
+                    (getPieceColor(piece) === 'black' && toRow === 9)) {
+                    board[toRow][toCol] = getPieceColor(piece) === 'white' ? 'F' : 'f';
+                }
+            }
+            
+            lastMove = { from: [fromRow, fromCol], to: [toRow, toCol] };
+            currentTurn = currentTurn === 'white' ? 'black' : 'white';
+            
+            const statusEl = document.getElementById('gameStatus');
+            if (isInCheck(currentTurn)) {
+                if (!hasLegalMoves(currentTurn)) {
+                    gameOver = true;
+                    const winner = currentTurn === 'white' ? 'Black' : 'White';
+                    statusEl.textContent = `Checkmate! ${winner} wins! 🎉`;
+                    statusEl.style.display = 'block';
+                    statusEl.className = 'status-message success';
+                    return;
+                }
+                statusEl.textContent = 'Check!';
+                statusEl.style.display = 'block';
+                statusEl.className = 'status-message error';
+            } else if (!hasLegalMoves(currentTurn)) {
+                gameOver = true;
+                statusEl.textContent = 'Stalemate! Draw.';
+                statusEl.style.display = 'block';
+                statusEl.className = 'status-message info';
+            } else {
+                statusEl.style.display = 'none';
+            }
+        }
+
+        function handleSquareClick(e) {
+            if (gameOver) return;
+            if (currentTurn !== myColor) return;
+            
+            const square = e.currentTarget;
+            const row = parseInt(square.dataset.row);
+            const col = parseInt(square.dataset.col);
+            
+            if (selectedSquare) {
+                const [selectedRow, selectedCol] = selectedSquare;
+                
+                const isValid = validMoves.some(([r, c]) => r === row && c === col);
+                if (isValid) {
+                    makeMove(selectedRow, selectedCol, row, col);
+                    sendMove({ fromRow: selectedRow, fromCol: selectedCol, toRow: row, toCol: col });
+                    selectedSquare = null;
+                    validMoves = [];
+                    renderBoard();
+                } else {
+                    const piece = board[row][col];
+                    if (piece && getPieceColor(piece) === currentTurn) {
+                        selectedSquare = [row, col];
+                        validMoves = getAllLegalMoves(row, col);
+                    } else {
+                        selectedSquare = null;
+                        validMoves = [];
+                    }
+                }
+            } else {
+                const piece = board[row][col];
+                if (piece && getPieceColor(piece) === currentTurn) {
+                    selectedSquare = [row, col];
+                    validMoves = getAllLegalMoves(row, col);
+                }
+            }
+            
+            renderBoard();
+        }
+
+        function renderBoard() {
+            const boardEl = document.getElementById('board');
+            boardEl.innerHTML = '';
+            
+            for (let row = 0; row < 10; row++) {
+                for (let col = 0; col < 6; col++) {
+                    const square = document.createElement('div');
+                    square.className = 'square';
+                    square.className += (row + col) % 2 === 0 ? ' light' : ' dark';
+                    square.dataset.row = row;
+                    square.dataset.col = col;
+                    
+                    if (selectedSquare && selectedSquare[0] === row && selectedSquare[1] === col) {
+                        square.classList.add('selected');
+                    }
+                    
+                    const isValidMove = validMoves.some(([r, c]) => r === row && c === col);
+                    if (isValidMove) {
+                        if (board[row][col]) {
+                            square.classList.add('valid-capture');
+                        } else {
+                            square.classList.add('valid-move');
+                        }
+                    }
+                    
+                    if (lastMove) {
+                        if ((lastMove.from[0] === row && lastMove.from[1] === col) ||
+                            (lastMove.to[0] === row && lastMove.to[1] === col)) {
+                            square.classList.add('last-move');
+                        }
+                    }
+                    
+                    const piece = board[row][col];
+                    if (piece) {
+                        const pieceEl = createPieceSVG(piece);
+                        square.appendChild(pieceEl);
+                    }
+                    
+                    square.addEventListener('click', handleSquareClick);
+                    
+                    boardEl.appendChild(square);
+                }
+            }
+            
+            const turnEl = document.getElementById('turnIndicator');
+            turnEl.textContent = `${currentTurn.charAt(0).toUpperCase() + currentTurn.slice(1)}'s Turn`;
+            turnEl.className = 'turn-indicator turn-' + currentTurn;
+            
+            renderCapturedPieces();
+        }
+
+        function renderCapturedPieces() {
+            const yourCapturedEl = document.getElementById('capturedYou');
+            const oppCapturedEl = document.getElementById('capturedOpponent');
+            
+            yourCapturedEl.innerHTML = '';
+            oppCapturedEl.innerHTML = '';
+            
+            const yourCaptured = myColor === 'white' ? capturedBlack : capturedWhite;
+            const oppCaptured = myColor === 'white' ? capturedWhite : capturedBlack;
+            
+            yourCaptured.forEach(piece => {
+                const svg = createPieceSVG(piece, true);
+                yourCapturedEl.appendChild(svg);
+            });
+            
+            oppCaptured.forEach(piece => {
+                const svg = createPieceSVG(piece, true);
+                oppCapturedEl.appendChild(svg);
+            });
+        }
+
+        function createPieceSVG(piece, small = false) {
+            const div = document.createElement('div');
+            div.className = small ? 'captured-piece' : 'piece';
+            
+            const color = getPieceColor(piece);
+            const type = piece.toLowerCase();
+            
+            const mainColor = color === 'white' ? '#4a90e2' : '#c0392b';
+            const accentColor = color === 'white' ? '#6bb6ff' : '#e74c3c';
+            const darkColor = color === 'white' ? '#2c5aa0' : '#7f1d1d';
+            
+            let svg = '';
+            
+            if (type === 'r') {
+                svg = `<svg viewBox="0 0 100 100" width="100%" height="100%">
+                    <rect x="30" y="70" width="40" height="8" rx="2" fill="${mainColor}" stroke="${darkColor}" stroke-width="2"/>
+                    <rect x="35" y="40" width="30" height="30" rx="2" fill="${accentColor}" stroke="${darkColor}" stroke-width="2"/>
+                    <rect x="40" y="25" width="20" height="15" rx="1" fill="${mainColor}" stroke="${darkColor}" stroke-width="1.5"/>
+                    <rect x="48" y="10" width="4" height="20" fill="${darkColor}"/>
+                    <path d="M 52 10 L 70 15 L 52 20 Z" fill="${color === 'white' ? '#00d9ff' : '#ff4444'}" stroke="${darkColor}" stroke-width="1"/>
+                    <rect x="42" y="45" width="6" height="6" fill="#1a1a2e" opacity="0.7"/>
+                    <rect x="52" y="45" width="6" height="6" fill="#1a1a2e" opacity="0.7"/>
+                </svg>`;
+            } else if (type === 'f') {
+                svg = `<svg viewBox="0 0 100 100" width="100%" height="100%">
+                    <rect x="38" y="50" width="24" height="30" rx="2" fill="${darkColor}" stroke="#1a1a2e" stroke-width="2"/>
+                    <ellipse cx="50" cy="38" rx="14" ry="16" fill="${mainColor}" stroke="${darkColor}" stroke-width="2"/>
+                    <ellipse cx="50" cy="38" rx="10" ry="8" fill="${color === 'white' ? '#00d9ff' : '#ff4444'}" opacity="0.6"/>
+                    <circle cx="45" cy="36" r="3" fill="#1a1a2e" stroke="${color === 'white' ? '#00ff00' : '#ff0000'}" stroke-width="1"/>
+                    <circle cx="55" cy="36" r="3" fill="#1a1a2e" stroke="${color === 'white' ? '#00ff00' : '#ff0000'}" stroke-width="1"/>
+                    <path d="M 50 48 L 52 54 L 58 54 L 53 58 L 55 64 L 50 60 L 45 64 L 47 58 L 42 54 L 48 54 Z" fill="#ffd700" stroke="#ff8800" stroke-width="1"/>
+                    <rect x="60" y="58" width="15" height="3" rx="1" fill="#2a2a2a"/>
+                </svg>`;
+            } else if (type === 't') {
+                svg = `<svg viewBox="0 0 100 100" width="100%" height="100%">
+                    <rect x="20" y="70" width="60" height="12" rx="6" fill="#2a2a2a" stroke="#1a1a2e" stroke-width="2"/>
+                    <rect x="25" y="72" width="10" height="8" fill="#3a3a3a"/>
+                    <rect x="65" y="72" width="10" height="8" fill="#3a3a3a"/>
+                    <rect x="28" y="50" width="44" height="20" rx="3" fill="${mainColor}" stroke="${darkColor}" stroke-width="2"/>
+                    <rect x="35" y="35" width="30" height="15" rx="2" fill="${accentColor}" stroke="${darkColor}" stroke-width="2"/>
+                    <rect x="65" y="40" width="25" height="6" rx="3" fill="#2a2a2a" stroke="#1a1a2e" stroke-width="1.5"/>
+                    <circle cx="50" cy="42" r="4" fill="#2a2a2a"/>
+                </svg>`;
+            } else if (type === 'd') {
+                svg = `<svg viewBox="0 0 100 100" width="100%" height="100%">
+                    <circle cx="50" cy="50" r="14" fill="${mainColor}" stroke="${darkColor}" stroke-width="2"/>
+                    <circle cx="50" cy="50" r="6" fill="#1a1a2e" opacity="0.8"/>
+                    <circle cx="50" cy="50" r="3" fill="${color === 'white' ? '#00d9ff' : '#ff4444'}"/>
+                    <rect x="47" y="20" width="6" height="18" rx="2" fill="${accentColor}"/>
+                    <circle cx="50" cy="18" r="8" fill="${color === 'white' ? '#e8e8e8' : '#2a2a2a'}" stroke="${darkColor}" stroke-width="1.5"/>
+                    <rect x="62" y="47" width="18" height="6" rx="2" fill="${accentColor}"/>
+                    <circle cx="82" cy="50" r="8" fill="${color === 'white' ? '#e8e8e8' : '#2a2a2a'}" stroke="${darkColor}" stroke-width="1.5"/>
+                    <rect x="47" y="62" width="6" height="18" rx="2" fill="${accentColor}"/>
+                    <circle cx="50" cy="82" r="8" fill="${color === 'white' ? '#e8e8e8' : '#2a2a2a'}" stroke="${darkColor}" stroke-width="1.5"/>
+                    <rect x="20" y="47" width="18" height="6" rx="2" fill="${accentColor}"/>
+                    <circle cx="18" cy="50" r="8" fill="${color === 'white' ? '#e8e8e8' : '#2a2a2a'}" stroke="${darkColor}" stroke-width="1.5"/>
+                </svg>`;
+            } else if (type === 'a') {
+                svg = `<svg viewBox="0 0 100 100" width="100%" height="100%">
+                    <path d="M 20 50 Q 18 48 18 45 L 25 42 L 70 44 L 78 46 L 80 50 L 78 54 L 70 56 L 25 58 L 18 55 Q 18 52 20 50 Z" 
+                          fill="${mainColor}" stroke="${darkColor}" stroke-width="2"/>
+                    <path d="M 18 45 Q 12 47.5 12 50 Q 12 52.5 18 55 L 18 45 Z" fill="${darkColor}"/>
+                    <ellipse cx="32" cy="42" rx="9" ry="8" fill="${color === 'white' ? '#00d9ff' : '#ff4444'}" opacity="0.8" stroke="${darkColor}" stroke-width="1.5"/>
+                    <ellipse cx="32" cy="40" rx="6" ry="5" fill="#ffffff" opacity="0.5"/>
+                    <path d="M 27 42 Q 32 38 37 42" stroke="${darkColor}" stroke-width="0.5" opacity="0.3" fill="none"/>
+                    <path d="M 48 50 L 45 72 L 52 70 L 54 50 Z" fill="${accentColor}" stroke="${darkColor}" stroke-width="2"/>
+                    <line x1="48" y1="58" x2="50" y2="68" stroke="${darkColor}" stroke-width="0.5" opacity="0.3"/>
+                    <path d="M 52 50 L 50 72 L 56 70 L 58 50 Z" fill="${accentColor}" stroke="${darkColor}" stroke-width="1.5" opacity="0.4"/>
+                    <path d="M 70 44 L 78 46 L 80 50 L 78 54 L 70 56 Z" fill="${darkColor}" opacity="0.2"/>
+                    <path d="M 72 50 L 75 26 L 82 28 L 78 50 Z" fill="${mainColor}" stroke="${darkColor}" stroke-width="1.5"/>
+                    <line x1="76" y1="35" x2="77" y2="45" stroke="${darkColor}" stroke-width="0.5" opacity="0.2"/>
+                    <path d="M 74 48 L 82 44 L 84 46 L 76 50 Z" fill="${accentColor}" stroke="${darkColor}" stroke-width="1"/>
+                    <path d="M 74 52 L 82 56 L 84 54 L 76 50 Z" fill="${accentColor}" stroke="${darkColor}" stroke-width="1" opacity="0.6"/>
+                    <ellipse cx="79" cy="50" rx="3" ry="7" fill="#1a1a2e"/>
+                    <ellipse cx="79" cy="50" rx="2" ry="5" fill="${color === 'white' ? '#4a90e2' : '#c0392b'}" opacity="0.7"/>
+                    <ellipse cx="50" cy="56" rx="6" ry="2" fill="#1a1a2e" opacity="0.5"/>
+                    <path d="M 44 56 Q 50 54 56 56" stroke="${darkColor}" stroke-width="0.8" fill="none" opacity="0.4"/>
+                    <line x1="25" y1="50" x2="70" y2="50" stroke="${darkColor}" stroke-width="0.5" opacity="0.2"/>
+                    <line x1="40" y1="47" x2="60" y2="47" stroke="${darkColor}" stroke-width="0.3" opacity="0.15"/>
+                    <line x1="40" y1="53" x2="60" y2="53" stroke="${darkColor}" stroke-width="0.3" opacity="0.15"/>
+                    <circle cx="32" cy="41" r="1" fill="#ffffff" opacity="0.7"/>
+                    <ellipse cx="45" cy="46" rx="8" ry="2" fill="#ffffff" opacity="0.1"/>
+                </svg>`;
+            } else if (type === 's') {
+                svg = `<svg viewBox="0 0 100 100" width="100%" height="100%">
+                    <rect x="43" y="55" width="14" height="25" rx="2" fill="${mainColor}" stroke="${darkColor}" stroke-width="1.5"/>
+                    <ellipse cx="50" cy="45" rx="10" ry="12" fill="${accentColor}" stroke="${darkColor}" stroke-width="1.5"/>
+                    <rect x="44" y="42" width="12" height="8" rx="1" fill="#1a1a2e" opacity="0.6"/>
+                    <rect x="45" y="58" width="10" height="8" fill="${darkColor}" opacity="0.7"/>
+                    <rect x="56" y="63" width="12" height="2" rx="1" fill="#2a2a2a"/>
+                </svg>`;
+            }
+            
+            div.innerHTML = svg;
+            return div;
+        }
+    </script>
+</body>
+</html>

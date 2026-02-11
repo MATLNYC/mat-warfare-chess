@@ -1,0 +1,16 @@
+{
+  "name": "mat-modern-warfare-chess",
+  "version": "1.0.0",
+  "description": "Online multiplayer modern warfare chess game",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "socket.io": "^4.5.4"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}
